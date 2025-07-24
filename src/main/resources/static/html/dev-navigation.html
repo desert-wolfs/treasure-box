@@ -1,0 +1,337 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>开发工具导航栏</title>
+  <style>
+    :root {
+      --primary-color: #2c3e50;
+      --secondary-color: #3498db;
+      --background-color: #ecf0f1;
+      --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      --transition-duration: 0.3s;
+      --item-height: 60px;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--background-color);
+    }
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+    .left-menu {
+      width: 20%;
+      background-color: var(--primary-color);
+      color: white;
+      overflow-y: auto;
+      box-shadow: var(--box-shadow);
+    }
+    .left-menu-title {
+      padding: 25px 16px;
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+    .environment-item {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .environment-header {
+      display: flex;
+      align-items: center;
+      height: var(--item-height);
+      padding: 0 24px;
+      cursor: pointer;
+      position: relative;
+      justify-content: space-between;
+    }
+    .arrow-icon {
+      width: 12px;
+      height: 12px;
+      transition: transform var(--transition-duration);
+    }
+    .environment-item.open .arrow-icon {
+      transform: rotate(90deg);
+    }
+    .environment-header:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    .category-submenu {
+      background-color: rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transform: scaleY(0);
+      transform-origin: top;
+      transition: all 0.3s ease;
+    }
+    .environment-item.open .category-submenu {
+      max-height: 1000px;
+      opacity: 1;
+      transform: scaleY(1);
+    }
+    .category-item {
+      height: var(--item-height);
+      padding: 0 24px 0 48px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      transition: background-color var(--transition-duration);
+      display: flex;
+      align-items: center;
+    }
+    .category-item.selected {
+      background-color: var(--secondary-color);
+    }
+    .category-item:hover:not(.selected) {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    .right-content {
+      width: 80%;
+      padding: 30px;
+      overflow-y: auto;
+      flex-wrap: wrap;
+      gap: 25px;
+    }
+    .tool-box {
+      background-color: white;
+      border-radius: 12px;
+      width: 200px;
+      height: 100px;
+      text-align: center;
+      box-shadow: var(--box-shadow);
+      transition: transform var(--transition-duration), box-shadow var(--transition-duration);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+    .tool-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    }
+    .tool-link {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 500;
+      display: flex;
+      width: 100%;
+      height: 100%;
+      justify-content: center;
+      align-items: center;
+    }
+    .context-menu {
+      position: absolute;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: var(--box-shadow);
+      display: none;
+      overflow: hidden;
+      z-index: 1000;
+    }
+    .context-menu-item {
+      padding: 12px 20px;
+      cursor: pointer;
+      transition: background-color var(--transition-duration);
+      color: var(--primary-color);
+    }
+    .context-menu-item:hover {
+      background-color: var(--background-color);
+    }
+    .toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 16px 24px;
+      border-radius: 8px;
+      display: none;
+      z-index: 1001;
+      font-size: 14px;
+    }
+    .environment-indicator {
+        width: 100%;
+        padding: 5px 15px;
+        background-image: linear-gradient(to right, rgba(52, 152, 219, 0.5), rgba(52, 152, 219, 0.00));
+        font-weight: bold;
+        color: var(--primary-color);
+        height: 35px;
+        box-sizing: border-box;
+    }
+    .content-container {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 25px;
+        padding: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="left-menu">
+      <div class="left-menu-title">导航栏</div>
+      <div class="environment-item">
+        <div class="environment-header">
+          <span>dev 环境</span>
+          <span class="arrow-icon">▶</span>
+        </div>
+        <div class="category-submenu">
+          <div class="category-item" data-category="dev-database">数据库</div>
+          <div class="category-item" data-category="dev-build-tools">构建工具</div>
+          <div class="category-item" data-category="dev-log-tools">日志工具</div>
+        </div>
+      </div>
+      <div class="environment-item">
+        <div class="environment-header">
+          <span>sit 环境</span>
+          <span class="arrow-icon">▶</span>
+        </div>
+        <div class="category-submenu">
+          <div class="category-item" data-category="sit-database">数据库</div>
+          <div class="category-item" data-category="sit-build-tools">构建工具</div>
+          <div class="category-item" data-category="sit-log-tools">日志工具</div>
+        </div>
+      </div>
+    </div>
+    <div class="right-content" id="rightContent">
+      <div class="environment-indicator">dev环境</div>
+      <div class="content-container"></div>
+    </div>
+  </div>
+  <div class="context-menu" id="contextMenu">
+    <div class="context-menu-item" onclick="copyText('username')">复制用户名</div>
+    <div class="context-menu-item" onclick="copyText('password')">复制密码</div>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script>
+    const environmentItems = document.querySelectorAll('.environment-item');
+    const categoryItems = document.querySelectorAll('.category-item');
+    const rightContent = document.getElementById('rightContent');
+    // 删除动态创建环境标识和内容容器的代码
+    const contentContainer = document.querySelector('.content-container');
+    const contextMenu = document.getElementById('contextMenu');
+    const toast = document.getElementById('toast');
+    let targetLink = null;
+
+    const toolsData = {
+      'dev-database': [
+        { name: 'Dev Redis', url: 'https://redis.io', username: 'dev_redis_user', password: 'dev_redis_pass' },
+        { name: 'Dev Redis', url: 'https://redis.io', username: 'dev_redis_user', password: 'dev_redis_pass' },
+        { name: 'Dev Redis', url: 'https://redis.io', username: 'dev_redis_user', password: 'dev_redis_pass' },
+        { name: 'Dev Redis', url: 'https://redis.io', username: 'dev_redis_user', password: 'dev_redis_pass' },
+        { name: 'Dev Redis', url: 'https://redis.io', username: 'dev_redis_user', password: 'dev_redis_pass' },
+        { name: 'Dev Redis', url: 'https://redis.io', username: 'dev_redis_user', password: 'dev_redis_pass' },
+        { name: 'Dev Redis', url: 'https://redis.io', username: 'dev_redis_user', password: 'dev_redis_pass' },
+        { name: 'Dev Redis', url: 'https://redis.io', username: 'dev_redis_user', password: 'dev_redis_pass' },
+        { name: 'Dev Redis', url: 'https://redis.io', username: 'dev_redis_user', password: 'dev_redis_pass' },
+        { name: 'Dev Redis', url: 'https://redis.io', username: 'dev_redis_user', password: 'dev_redis_pass' },
+        { name: 'Dev Redis', url: 'https://redis.io', username: 'dev_redis_user', password: 'dev_redis_pass' },
+        { name: 'Dev Redis', url: 'https://redis.io', username: 'dev_redis_user', password: 'dev_redis_pass' },
+        { name: 'Dev MySQL', url: 'https://mysql.com', username: 'dev_mysql_user', password: 'dev_mysql_pass' }
+      ],
+      'sit-database': [
+        { name: 'Sit Redis', url: 'https://redis.io', username: 'sit_redis_user', password: 'sit_redis_pass' },
+        { name: 'Sit MySQL', url: 'https://mysql.com', username: 'sit_mysql_user', password: 'sit_mysql_pass' }
+      ],
+      'dev-build-tools': [
+        { name: 'Dev Spug', url: 'https://spug.cc', username: 'dev_spug_user', password: 'dev_spug_pass' }
+      ],
+      'sit-build-tools': [
+        { name: 'Sit Spug', url: 'https://spug.cc', username: 'sit_spug_user', password: 'sit_spug_pass' }
+      ],
+      'dev-log-tools': [
+        { name: 'Dev ELK Stack', url: 'https://www.elastic.co/what-is/elk-stack', username: 'dev_elk_user', password: 'dev_elk_pass' },
+        { name: 'Dev Graylog', url: 'https://www.graylog.org', username: 'dev_graylog_user', password: 'dev_graylog_pass' }
+      ],
+      'sit-log-tools': [
+        { name: 'Sit ELK Stack', url: 'https://www.elastic.co/what-is/elk-stack', username: 'sit_elk_user', password: 'sit_elk_pass' },
+        { name: 'Sit Graylog', url: 'https://www.graylog.org', username: 'sit_graylog_user', password: 'sit_graylog_pass' }
+      ]
+    };
+
+    function closeAllSubmenus() {
+      environmentItems.forEach(item => item.classList.remove('open'));
+    }
+
+    environmentItems.forEach(item => {
+      const header = item.querySelector('.environment-header');
+      header.addEventListener('click', () => {
+        const isOpen = item.classList.contains('open');
+        closeAllSubmenus();
+        if (!isOpen) item.classList.add('open');
+      });
+    });
+
+    categoryItems.forEach(item => {
+      item.addEventListener('click', () => {
+        categoryItems.forEach(i => i.classList.remove('selected'));
+        item.classList.add('selected');
+        const category = item.getAttribute('data-category');
+        // 从分类ID提取环境名称并更新标识
+        const envName = category.split('-')[0];
+        document.querySelector('.environment-indicator').textContent = `${envName}环境`;
+        renderTools(category);
+      });
+    });
+
+    function renderTools(category) {
+      contentContainer.innerHTML = '';
+      if (!toolsData[category]) return;
+      toolsData[category].forEach(tool => {
+        const box = document.createElement('div');
+        box.className = 'tool-box';
+        box.innerHTML = `<a href="${tool.url}" class="tool-link" data-username="${tool.username}" data-password="${tool.password}" tool-name="${tool.name}" >${tool.name}</a>`;
+        const link = box.querySelector('.tool-link');
+        link.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          targetLink = link;
+          contextMenu.style.display = 'block';
+          contextMenu.style.left = e.pageX + 'px';
+          contextMenu.style.top = e.pageY + 'px';
+        });
+        contentContainer.appendChild(box);
+      });
+    }
+
+    document.addEventListener('click', (e) => {
+      if (!contextMenu.contains(e.target) && !e.target.classList.contains('tool-link')) {
+        contextMenu.style.display = 'none';
+      }
+    });
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 2000);
+    }
+
+    function copyText(type) {
+      if (targetLink) {
+        const textToCopy = targetLink.getAttribute(`data-${type}`);
+        const toolName = targetLink.getAttribute(`tool-name`);
+        navigator.clipboard.writeText(textToCopy).then(() => {
+          showToast(`已复制[${toolName}] ${type === 'username' ? '用户名' : '密码'}`);
+        }).catch(err => {
+          showToast(`复制失败: ${err}`);
+        });
+        contextMenu.style.display = 'none';
+      }
+    }
+
+    if (categoryItems.length > 0) {
+      categoryItems[0].classList.add('selected');
+      const firstCategory = categoryItems[0].getAttribute('data-category');
+      renderTools(firstCategory);
+    }
+  </script>
+</body>
+</html>
