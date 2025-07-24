@@ -1,0 +1,66 @@
+<!DOCTYPE generatorConfiguration PUBLIC
+        "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+    <!-- MyBatis3Simple风格 -->
+    <!-- MyBatis3风格 -->
+    <context id="simple" targetRuntime="MyBatis3">
+
+        <property name="javaFileEncoding" value="UTF-8"/>
+        <!--生成mapper.xml时覆盖原文件-->
+        <plugin type="org.mybatis.generator.plugins.UnmergeableXmlMappersPlugin"/>
+
+        <!-- 自定义插件 -->
+        <plugin type="com.douniu.box.gencode.plugin.LombokPlugin"/>
+        <!-- 配置 DaoMapperPlugin，需替换为实际的类路径 -->
+        <plugin type="com.douniu.box.gencode.plugin.DaoMapperPlugin"/>
+        <!-- 配置 InsertKeyPlugin，替换为实际的类路径 -->
+        <plugin type="com.douniu.box.gencode.plugin.InsertKeyPlugin"/>
+
+        <commentGenerator type="com.douniu.box.gencode.plugin.CustomCommentGenerator">
+            <!-- 是否去除自动生成的注释 true：是 ： false:否。 自动生成注释太啰嗦，可以编码扩展CommentGenerator -->
+            <property name="suppressAllComments" value="true"/>
+        </commentGenerator>
+
+        <!-- 数据库连接 -->
+        <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
+                        connectionURL="jdbc:mysql://192.168.2.74:3306/newfaceshow?useUnicode=true&amp;characterEncoding=utf8&amp;tinyInt1isBit=true&amp;serverTimezone=UTC"
+                        userId="root" password="root">
+            <!-- 设置为true就只读取db_book下的表, 否则会优先读取到mysql的user表  -->
+            <property name="nullCatalogMeansCurrent" value="true"/>
+        </jdbcConnection>
+
+        <!-- 字段自定义转换 -->
+        <javaTypeResolver  type="com.douniu.box.gencode.plugin.CustomTypeResolver">
+            <!--            <property name="forceBigDecimals" value="false"/>-->
+        </javaTypeResolver>
+
+        <!-- 生成PO的包名和位置 -->
+        <javaModelGenerator targetPackage="generate.entity" targetProject="src/main/java"/>
+        <!-- 生成XML映射文件的包名和位置 -->
+        <sqlMapGenerator targetPackage="generate.mapper" targetProject="src/main/java"/>
+        <!-- 生成Mapper接口的包名和位置 -->
+        <javaClientGenerator type="XMLMAPPER" targetPackage="generate.dao" targetProject="src/main/java">
+<!--            <property name="enableSubPackages" value="true"/>-->
+        </javaClientGenerator>
+
+        <!-- 要生成对应表配置 -->
+        <table tableName="game_rank_daily_statistics" domainObjectName="GameRankDailyStatistics"
+               enableCountByExample="false"
+               enableDeleteByExample="false"
+               enableSelectByExample="false"
+               enableUpdateByExample="false">
+            <!-- 自增主键列 -->
+            <!--      <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>-->
+            <!-- tinyint映射为Integer -->
+<!--            <columnOverride column="log_type" javaType="Integer" jdbcType="TINYINT"/>-->
+        </table>
+
+
+
+
+
+
+
+    </context>
+</generatorConfiguration>
