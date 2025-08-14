@@ -1,15 +1,14 @@
 package com.douniu.box.gencode;
 
+import cn.hutool.core.collection.CollUtil;
 import com.douniu.box.utils.StrUtil;
-import org.mybatis.generator.api.*;
+import org.mybatis.generator.api.MyBatisGenerator;
 import org.mybatis.generator.config.*;
-import org.mybatis.generator.exception.InvalidConfigurationException;
 import org.mybatis.generator.internal.DefaultShellCallback;
 
 import java.io.File;
-import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import static com.douniu.box.gencode.controller.GenCodeController.GEN_TARGET;
@@ -36,11 +35,15 @@ public class MybatisGeneratorRunner {
     // 方式二： xml转成Configuration形式
     /**
      * 方式二： xml转成Configuration形式
-     * @param args 表名 数组
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
+        List<String> tables = List.of("table1", "table2", "table3");
+        GenCodeService.GenCodeRequest request = new GenCodeService.GenCodeRequest(tables, new LinkedList<>());
+        genCodes(request);
+    }
 
+    public static void genCodes(GenCodeService.GenCodeRequest request) throws Exception {
         List<String> warnings = new ArrayList<>();
 
         // 创建配置对象
@@ -103,16 +106,42 @@ public class MybatisGeneratorRunner {
         javaClientConfig.setTargetProject(GEN_TARGET);
         context.setJavaClientGeneratorConfiguration(javaClientConfig);
 
-        for (String tableName : args) {
-            genOneTable(context, config, tableName, warnings);
+        for (String tableName : request.tableNames()) {
+            genOneTable(context, config, tableName, warnings, request.newFileNames());
         }
     }
 
-    private static void genOneTable(Context context, Configuration config, String tableName, List<String> warnings) throws InvalidConfigurationException, SQLException, IOException, InterruptedException {
+    private static String getNewFileName(String tableName, List<String> newFileNames) {
+        if (CollUtil.isEmpty(newFileNames)) {
+            return StrUtil.toPascalCase(tableName);
+        }
+        String finalName = StrUtil.toPascalCase(tableName);
+        for (String newFileName : newFileNames) {
+            List<String> split = cn.hutool.core.util.StrUtil.split(newFileName, "@");
+            if (split.size() != 2) {
+                continue;
+            }
+            if (cn.hutool.core.util.StrUtil.isBlank(split.get(0))) {
+                continue;
+            }
+            if (cn.hutool.core.util.StrUtil.containsIgnoreCase(finalName, split.get(0))) {
+                String replace = cn.hutool.core.util.StrUtil.replaceIgnoreCase(finalName, split.get(0), split.get(1).trim());
+                // 重新大驼峰
+                finalName = StrUtil.toPascalCase(replace);
+            }
+        }
+        return finalName;
+    }
+
+    private static void genOneTable(Context context,
+                                    Configuration config,
+                                    String tableName,
+                                    List<String> warnings,
+                                    List<String> newFileNames) throws Exception {
         // 配置表信息
         TableConfiguration tableConfig = new TableConfiguration(context);
         tableConfig.setTableName(tableName);
-        tableConfig.setDomainObjectName(StrUtil.toPascalCase(tableName));
+        tableConfig.setDomainObjectName(getNewFileName(tableName, newFileNames));
         tableConfig.setCountByExampleStatementEnabled(false);
         tableConfig.setDeleteByExampleStatementEnabled(false);
         tableConfig.setSelectByExampleStatementEnabled(false);

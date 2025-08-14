@@ -2,8 +2,9 @@ package com.douniu.box.gencode.controller;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ZipUtil;
-import com.douniu.box.gencode.MybatisGeneratorRunner;
+import com.douniu.box.gencode.GenCodeService;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,13 +22,18 @@ public class GenCodeController {
     public static final String GEN_TARGET = TEMP_TARGET + "code";
     public static final String ZIP_TARGET = TEMP_TARGET +"code.zip";
 
-    // http://127.0.0.1:8080/gen-code/download?tableNames=game_rank_day_log,game_rank_daily_data
+    @Autowired
+    private GenCodeService genCodeService;
+
+    // http://127.0.0.1:8789/gen-code/download?tableNames=game_rank_day_log,game_rank_daily_data&newFileNames=
     @GetMapping("/download")
-    public void downloadCode(@RequestParam("tableNames") List<String> tableNames, HttpServletResponse response) throws Exception {
+    public void downloadCode(@RequestParam("tableNames") List<String> tableNames,
+                             @RequestParam("newFileNames") List<String> newFileNames,
+                             HttpServletResponse response) throws Exception {
         OutputStream out = null;
         File sourceFile = new File(GEN_TARGET);
         try {
-            MybatisGeneratorRunner.main(tableNames.toArray(new String[0]));
+            genCodeService.genCode(new GenCodeService.GenCodeRequest(tableNames, newFileNames));
             if (!sourceFile.exists()) {
                 System.out.println("sourceFile not exists");
                 return;

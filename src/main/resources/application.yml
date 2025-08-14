@@ -1,0 +1,26 @@
+server:
+  port: 8789
+
+spring:
+  application:
+    name: treasure-box
+#  datasource:
+#    url: jdbc:mysql://localhost:3306/treasure_box?useSSL=false&serverTimezone=UTC
+#    username: root
+#    password: 123456
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    redis:
+      database: 0
+      timeout: 6000
+      cluster:
+        nodes: 192.168.2.76:7001,192.168.2.76:7002,192.168.2.76:7003,192.168.2.76:7004,192.168.2.76:7005,192.168.2.76:7006
+      lettuce:
+        pool:
+          max-active: 1000
+          max-wait: -1
+          max-idle: 10
+          min-idle: 5
+
+
+
