@@ -41,12 +41,12 @@
         highlight-current-row
         style="width: 800px"
       >
-        <el-table-column label="名称">
+        <el-table-column label="旧字符串">
           <template #default="{ row }">
             <el-input v-model="row.oldName" placeholder="请输入旧字符串" size="small"></el-input>
           </template>
         </el-table-column>
-        <el-table-column label="年龄">
+        <el-table-column label="新替换字符串">
           <template #default="{ row }">
             <el-input v-model="row.newName" placeholder="请输入新替换字符串" size="small"></el-input>
           </template>

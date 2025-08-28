@@ -1329,4 +1329,112 @@ public class RedisUtils {
             return connection.stringCommands().bitPos(key.getBytes(), value, range);
         });
     }
+
+    /**
+     * BITFIELD 核心功能 （有符号第一位1表示负数）
+     * BITFIELD 允许在单个命令中组合多个子命令（GET/SET/INCRBY），
+     *
+     * 主要用于：
+     * 批量位段读写：对非对齐的位范围进行操作（如从偏移量5开始读取12位整数）。
+     * 多类型整数支持：按有符号/无符号、不同位宽（8/16/32位等）解析位数据。
+     * 原子操作：支持位段的原子自增/自减，适用于计数器场景。
+     */
+    /**
+     * 获取位字段值
+     * @param key 键
+     * @param bitWidth 位宽度（几个位）
+     * @param offset 位偏移量（从哪个位开始）
+     * @return 整数值
+     * 例子，
+     * 假设 redis存储的值为 11010010，传参 bitWidth 为 4，offset 为 2，
+     * 则返回值为 0100（4 个二进制位），对应的十进制值为 4， 所以返回4。
+     */
+    public Long getBitField(String key, int bitWidth, int offset) {
+        List<Long> results = redisTemplate.opsForValue().bitField(
+                key,
+                BitFieldSubCommands.create()
+                        .get(BitFieldSubCommands.BitFieldType.unsigned(bitWidth))
+                        .valueAt(offset)
+        );
+        return results != null && !results.isEmpty() ? results.getFirst() : null;
+    }
+
+    /**
+     * 获取多个位字段值
+     */
+    public List<Long> getMultiBitField(String key, List<BitFieldConfig> configs) {
+        if (configs == null || configs.isEmpty()) {
+            throw new IllegalArgumentException("位段配置不能为空");
+        }
+
+        BitFieldSubCommands subCommands = BitFieldSubCommands.create();
+        for (BitFieldConfig config : configs) {
+            // 根据配置创建位段类型（有符号/无符号）
+            BitFieldSubCommands.BitFieldType type = config.signed ?
+                    BitFieldSubCommands.BitFieldType.signed(config.bitWidth) :
+                    BitFieldSubCommands.BitFieldType.unsigned(config.bitWidth);
+
+            // 添加GET子命令
+            subCommands = subCommands.get(type)
+                    .valueAt(config.offset);
+        }
+
+        return redisTemplate.opsForValue().bitField(key, subCommands);
+    }
+
+    /**
+     * 通用位段批量设置方法
+     * @param key Redis键
+     * @param configs 多个位段配置
+     * @return 每个位段设置前的旧值（null表示操作失败）
+     */
+    public List<Long> setMultiBitField(String key, List<BitFieldConfig> configs) {
+        if (configs == null || configs.isEmpty()) {
+            throw new IllegalArgumentException("位段配置不能为空");
+        }
+
+        BitFieldSubCommands subCommands = BitFieldSubCommands.create();
+        for (BitFieldConfig config : configs) {
+            // 根据配置创建位段类型（有符号/无符号）
+            BitFieldSubCommands.BitFieldType type = config.signed ?
+                    BitFieldSubCommands.BitFieldType.signed(config.bitWidth) :
+                    BitFieldSubCommands.BitFieldType.unsigned(config.bitWidth);
+
+            // 添加SET子命令
+            subCommands = subCommands.set(type)
+                    .valueAt(config.offset)
+                    .to(config.value);
+        }
+
+        return redisTemplate.opsForValue().bitField(key, subCommands);
+    }
+
+    /**
+     * 二进制原子递增
+     * @param key 键
+     * @param bitWidth 位宽度（几个位）
+     * @param offset 位偏移量（从哪个位开始）
+     * @param increment 增量
+     * @return 递增后的值
+     */
+    public Long incrBitField(String key, int bitWidth, int offset, long increment) {
+        List<Long> results = redisTemplate.opsForValue().bitField(
+                key,
+                BitFieldSubCommands.create()
+                        .incr(BitFieldSubCommands.BitFieldType.unsigned(bitWidth))
+                        .valueAt(offset)
+                        .overflow(BitFieldSubCommands.BitFieldIncrBy.Overflow.SAT) // 溢出策略:饱和
+                        .by(increment)
+        );
+        return results != null && !results.isEmpty() ? results.getFirst() : null;
+    }
+
+    public record BitFieldConfig(
+            boolean signed,
+            int bitWidth,
+            int offset,
+            long value
+    ) {
+    }
+
 }
