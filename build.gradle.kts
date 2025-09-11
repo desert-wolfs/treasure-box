@@ -52,6 +52,8 @@ dependencies {
     implementation("org.apache.commons:commons-collections4:4.4")
     // commons.io
     implementation("commons-io:commons-io:2.11.0")
+    // netty
+    implementation("io.netty:netty-all:4.2.4.Final")
 }
 
 
