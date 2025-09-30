@@ -33,3 +33,8 @@ mybatis:
     map-underscore-to-camel-case: true
     # 打印SQL语句（开发环境建议开启，生产环境关闭）
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# 缓存预加载配置
+cache:
+  init:
+    enable: true
