@@ -4,11 +4,11 @@ server:
 spring:
   application:
     name: treasure-box
-#  datasource:
-#    url: jdbc:mysql://localhost:3306/treasure_box?useSSL=false&serverTimezone=UTC
-#    username: root
-#    password: 123456
-#    driver-class-name: com.mysql.cj.jdbc.Driver
+  datasource:
+    url: jdbc:mysql://localhost:3306/treasure_box?useSSL=false&serverTimezone=UTC
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
   data:
     redis:
       database: 0
@@ -22,5 +22,14 @@ spring:
           max-idle: 10
           min-idle: 5
 
-
-
+# MyBatis 配置
+mybatis:
+  # 指定Mapper XML文件的位置
+  mapper-locations: classpath:mapper/*.xml
+  # 指定实体类的包路径，可省略全限定类名
+#  type-aliases-package: com.douniu.box.mapper.entity
+  configuration:
+    # 开启驼峰命名转换（如数据库字段user_name转成实体类属性userName）
+    map-underscore-to-camel-case: true
+    # 打印SQL语句（开发环境建议开启，生产环境关闭）
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

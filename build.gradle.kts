@@ -33,7 +33,9 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     // MyBatis 核心依赖
-    implementation("org.mybatis:mybatis:3.5.11")
+//    implementation("org.mybatis:mybatis:3.5.11")
+    // MyBatis 与 Spring Boot 集成依赖
+    implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3")
     // MyBatis Generator 依赖
     implementation("org.mybatis.generator:mybatis-generator-core:1.4.1")
     // 数据库驱动，这里以 MySQL 为例，根据实际情况替换

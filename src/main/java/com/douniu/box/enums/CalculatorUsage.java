@@ -1,6 +1,6 @@
 package com.douniu.box.enums;
 
-public enum CalculatoUsage implements Operation {
+public enum CalculatorUsage implements Operation {
     /**
      * 加减乘除操作
      */
