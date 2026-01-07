@@ -16,7 +16,6 @@ import java.util.Objects;
  * RedisConfiguration
  * Redis配置
  *
- * @author ZhangYiDong
  * @date 2021/12/27 11:18
  */
 @Slf4j

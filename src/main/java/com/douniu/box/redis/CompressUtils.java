@@ -13,7 +13,6 @@ import java.util.zip.GZIPOutputStream;
 /**
  * CompressUtils
  *
- * @author ZhangYiDong
  * @date 2022/11/7 10:51
  */
 @Slf4j
