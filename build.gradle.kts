@@ -56,6 +56,7 @@ dependencies {
     implementation("commons-io:commons-io:2.11.0")
     // netty
     implementation("io.netty:netty-all:4.2.4.Final")
+    implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
 }
 
 
