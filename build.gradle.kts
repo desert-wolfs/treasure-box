@@ -64,3 +64,8 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+// 解决日志输出中文乱码问题
+tasks.withType<JavaExec> {
+    jvmArgs = listOf("-Dfile.encoding=UTF-8", "-Dsun.stdout.encoding=UTF-8", "-Dsun.stderr.encoding=UTF-8")
+}
